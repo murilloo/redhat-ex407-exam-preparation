@@ -1,0 +1,7 @@
+users:
+  - name: murillo
+    groupname: devops
+  - name: marina
+    groupname: dev
+  - name: benjamin
+    groupname: ops

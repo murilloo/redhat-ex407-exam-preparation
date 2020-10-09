@@ -1,0 +1,45 @@
+- name: playbook to create users accordingly with list
+
+  hosts: all
+
+  vars_files:
+    - vars/users.yml
+
+  tasks:
+
+    - name: create dev group
+      group:
+        name: "dev"
+      when: inventory_hostname in groups['dev']
+
+    - name: create ops group
+      group:
+        name: "ops"
+      when: inventory_hostname in groups['stage']
+
+    - name: create devops group
+      group:
+        name: "devops"
+      when: inventory_hostname in groups['prod']
+
+
+    - name: create users on dev servers
+      user:
+        name: "{{ item.name }}"
+        group: "{{ item.groupname }}"
+      loop: "{{ users }}"
+      when: inventory_hostname in groups['dev'] and item.groupname == "dev"
+
+    - name: create users on stage servers
+      user:
+        name: "{{ item.name }}"
+        group: "{{ item.groupname }}"
+      loop: "{{ users }}"
+      when: inventory_hostname in groups['stage'] and item.groupname == "ops"
+
+    - name: create users on prod servers
+      user:
+        name: "{{ item.name }}"
+        group: "{{ item.groupname }}"
+      loop: "{{ users }}"
+      when: inventory_hostname in groups['prod'] and item.groupname == "devops"

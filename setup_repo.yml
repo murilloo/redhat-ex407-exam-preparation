@@ -1,0 +1,67 @@
+- name: playbook to create a local repo using apache
+
+  hosts: localhost
+
+  tasks:
+
+    - name: install packages
+      yum:
+        name:
+          - httpd
+          - createrepo
+          - policycoreutils
+          - policycoreutils-python
+    
+    - name: ensure httpd is enabled
+      service:
+        name: httpd
+        state: started
+
+    - name: remove welcome.conf
+      file:
+        path: /etc/httpd/conf.d/welcome.conf
+        state: absent
+
+    - name: prepare httpd config
+      template:
+        src: ./templates/httpd.repo.j2
+        dest: /etc/httpd/conf/httpd.conf
+      notify: restart httpd
+
+    - name: ensure firewall is opened
+      firewalld:
+        service: http
+        permanent: yes
+        immediate: yes
+        state: enabled
+
+    - name: create folder for repo
+      file:
+        path: /var/www/repo/iso
+        state: directory
+    
+    - name: mount iso to the folder
+      mount:
+        path: /var/www/repo/iso
+        src: /home/ansible/exam/files/rhel-server-7.5-x86_64-dvd.iso
+        fstype: iso9660
+        state: mounted
+
+    - name: create repo
+      command: createrepo /var/www/repo
+
+    - name: Allow apache to modify files in /var/www/repo
+      sefcontext:
+        target: '/var/www/repo(/.*)?'
+        setype: httpd_sys_rw_content_t
+        state: present
+
+    - name: Apply new SELinux file context to filesystem
+      command: restorecon -irv /var/www/repo
+
+  handlers:
+
+    - name: restart httpd
+      service:
+        name: httpd
+        state: restarted

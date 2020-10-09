@@ -1,0 +1,24 @@
+- name: play for the roles
+
+  hosts: all
+
+  roles:
+    - web
+    - mountweb
+
+  post_tasks:
+
+    - name: check http endpoint is returning 200
+      uri:
+        url: "http://{{ item }}"
+        return_content: yes
+        status_code: 200
+      register: this
+      when: inventory_hostname in groups['webclients']
+      loop: "{{ groups['webservers'] }}"
+
+    - name: assert content is correct
+      assert:
+        that:
+          - "'welcome' in this.results.0.content" 
+      when: inventory_hostname in groups['webclients']

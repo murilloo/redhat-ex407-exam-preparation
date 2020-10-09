@@ -1,0 +1,8 @@
+gtm_certs:
+  - host: node1.example.com
+    vhosts:
+      - lb-a.example.com
+      - lb-b.example.com
+  - host: node2.example.com
+    vhosts:
+      - lb-c.example.com

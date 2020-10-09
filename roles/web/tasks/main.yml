@@ -1,0 +1,6 @@
+---
+- include: webserver.yml
+  when: "'webservers' in group_names"
+
+- include: webclients.yml
+  when: "'webclients' in group_names"

@@ -1,0 +1,48 @@
+- name: create partition
+  parted:
+    device: /dev/vdb
+    number: 1
+    state: present
+    part_end: 2GiB
+
+#- name: fail if there is already vdb1
+#  fail:
+#    msg: "There is a partition vdb1 created"
+#  when: ansible_facts['devices']['vdb']['partitions']['vdb1'] is defined
+
+- name: fail if partition is bigger than 3
+  fail:
+    msg: "Partition is bigger than 3"
+  when: ansible_facts['devices']['vdb']['partitions']['vdb1']['size'] > "3"
+
+- name: create a file system
+  filesystem:
+    fstype: xfs
+    dev: /dev/vdb1
+
+- name: ensure /web exists
+  file:
+    path: /web
+    state: directory
+
+- name: mount file system to /web
+  mount:
+   path: /web
+   fstype: xfs
+   src: /dev/vdb1
+   state: mounted
+
+- name: generate index.html
+  template:
+    src: ./templates/index.j2
+    dest: /web/index.html
+  notify: restart http
+
+- name: set selinux context to http config
+  sefcontext:
+    target: '/web/(.*)?'
+    setype: httpd_sys_content_t
+    state: present
+
+- name: apply new SELinux file context to filesystem
+  command: restorecon -irv /web

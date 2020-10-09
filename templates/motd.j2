@@ -1,0 +1,22 @@
+Hostname: {{ ansible_hostname }}
+System memory: {{ ansible_facts['memtotal_mb'] }} MiB
+Processor count: {{ ansible_facts['processor_count'] }}
+
+Primary disk size: {{ ansible_facts['devices']['vda']['size'] }}
+{% if ansible_facts['devices']['vdb']['size'] is defined %}
+Secondary disk size: {{ ansible_facts['devices']['vda']['size'] }}
+{% endif %}
+
+Mounts:
+{% for mounts in ansible_mounts %}
+{{ mounts.mount }} 	- {{ mounts.device }}	- {{ mounts.fstype }}
+{% endfor %}
+
+Interfaces:
+{% for items in ansible_interfaces %}
+- {{ items }}
+{% endfor %}
+{% for item in ansible_all_ipv4_addresses %} 
+IPv4: {{ item }} {% endfor %} {% for item in ansible_all_ipv6_addresses %} 
+IPv6: {{ item }} 
+{% endfor %}

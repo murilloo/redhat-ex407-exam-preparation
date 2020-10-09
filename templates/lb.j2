@@ -1,0 +1,12 @@
+{% for items in gtm_certs %}
+
+{% if items.host == inventory_hostname %}
+
+Host: {{ items.host }}
+
+{% for lb in items.vhosts %}
+LB: {{ lb }}
+{% endfor %}
+
+{% endif %}
+{% endfor %}

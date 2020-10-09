@@ -1,0 +1,6 @@
+    - name: install web clients
+      yum:
+        name:
+          - wget
+          - elinks
+        state: present

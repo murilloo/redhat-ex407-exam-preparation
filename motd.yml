@@ -1,0 +1,17 @@
+- name: playbook to generate a motd with system info
+
+  hosts: all
+
+  tasks:
+
+    - name: fail if vdb is undefined
+      fail:
+        msg: "vdb is not defined"
+      when: ansible_facts['devices']['vdb'] is undefined
+
+    - name: generate motd file
+      template:
+        src: ./templates/motd.j2
+        dest: /etc/motd
+   
+

@@ -1,0 +1,9 @@
+- name: setup a webclients
+  hosts: webclients
+  tasks:
+    - name: install web clients
+      yum:
+        name:
+          - wget
+          - elinks
+

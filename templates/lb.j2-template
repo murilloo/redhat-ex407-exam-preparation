@@ -1,0 +1,17 @@
+{% for items in gtm_certs %}
+
+{% if items.host == inventory_hostname %}
+Inventory: {{ inventory_hostname }}
+Ansible: {{ ansible_hostname }}
+Host: {{ items.host }}
+
+
+LB_A: {{ items.lb_a }}
+{% if items.lb_b is defined %}
+LB_B: {{ items.lb_b }}
+
+{% else %}
+No secondary LB
+{% endif %}
+{% endif %}
+{% endfor %}

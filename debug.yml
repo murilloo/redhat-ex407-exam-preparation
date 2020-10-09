@@ -1,0 +1,13 @@
+
+- name: debug
+
+  hosts: webservers
+
+  vars_files:
+    - vars/lb.yml
+
+  tasks:
+    - name: generate template
+      template:
+        src: ./templates/lb.j2
+        dest: ./lb.txt

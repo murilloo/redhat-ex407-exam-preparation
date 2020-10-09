@@ -1,0 +1,14 @@
+# Done
+
+* Verify how to setup roles path to ansible.cfg and ansible --version
+* Setup Ansible environment with different user than usual, this case "greg". SSH keys for root created already to all servers. 
+* Create Yum repositories using ansible ad-hoc commands from control node o the managed nodes
+* Configure /etc/hosts file based in a Jinja template with inventory hosts variables
+* Configure Apache HTTP server with specific context and SELinux context labels
+* Create a role that installs Apache and configures it with setting groupid permissions to index.html
+* Create a playbook to run partitioning, volume group, logical volume and failure tasks
+* Create a hardware playbook with information of devices
+* Create users based in a user list accordingly with groups and with encrypted passwords and ansible
+* Install configure Ansible Tower
+* Install Ansible galaxys roles defined in the material as tar files and create a requirements file
+* Create a Vault password and change its password

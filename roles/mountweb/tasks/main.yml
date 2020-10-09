@@ -1,0 +1,4 @@
+---
+# tasks file for mountweb
+- include: parted.yml
+  when: "'webservers' in group_names"

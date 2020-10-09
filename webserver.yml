@@ -1,0 +1,53 @@
+- name: play to setup a webserver
+
+  hosts: webservers
+
+  vars_files:
+    - vars/web-vars.yml
+
+  tasks:
+    - name: install httpd
+      yum:
+        name:
+        - "{{ web_packages }}"
+        - policycoreutils-python
+        state: present
+
+    - name: ensure service is up
+      service:
+        name: "{{ web_service }}"
+        state: started
+        enabled: yes
+
+    - name: ensure firewall is open
+      firewalld:
+        service: "{{ firewall_service }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+
+    - name: ensure template is copied
+      template:
+        src: ./templates/httpd.j2
+        dest: "{{ web_config_file }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart http
+
+    - name: set selinux context to http config
+      sefcontext:
+        target: '/etc/httpd/conf/(.*)?'
+        setype: httpd_config_t
+        state: present
+
+    - name: apply new SELinux file context to filesystem
+      command: restorecon -irv /etc/httpd/conf
+
+  handlers:
+
+    - name: restart http
+      service:
+        name: httpd
+        state: restarted
+
