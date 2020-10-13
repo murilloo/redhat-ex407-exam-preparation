@@ -1,0 +1,25 @@
+- name: create a partition for new http root
+  parted:
+    device: /dev/vdb
+    number: 1
+    state: present
+    part_end: 2GiB
+
+- name: create a xfs filesystem on /dev/vdb1
+  filesystem:
+    fstype: xfs
+    dev: /dev/vdb1
+  failed_when: ansible_facts['devices']['vdb']['partitions']['vdb1'] is defined
+
+- name: ensure directory exists
+  file:
+    path: "{{ http_root }}"
+    state: directory
+    recurse: yes
+
+- name: mount file system to {{ http_root }}
+  mount:
+    path: "{{ http_root }}"
+    fstype: xfs
+    src: /dev/vdb1
+    state: mounted

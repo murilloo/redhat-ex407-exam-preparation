@@ -1,0 +1,5 @@
+    - name: install webclients packages
+      yum:
+        name:
+          - wget
+          - elinks

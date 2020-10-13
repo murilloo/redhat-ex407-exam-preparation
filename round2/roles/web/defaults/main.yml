@@ -1,0 +1,9 @@
+---
+# defaults file for web
+packages:
+  - httpd
+  - policycoreutils-python
+  - policycoreutils
+
+http_port: 8081
+http_root: /web-02

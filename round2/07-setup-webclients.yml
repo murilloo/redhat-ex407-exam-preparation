@@ -1,0 +1,23 @@
+- name: play to configure webclients
+
+  hosts: webclients
+  
+  vars:
+    http_port: 8080
+
+  tasks:
+
+    - name: install webclients packages
+      yum:
+        name:
+          - wget
+          - elinks
+
+    - name: call url from webservers
+      uri:
+        url: "http://{{ item }}:{{ http_port}}"
+        return_content: yes
+      register: this
+      failed_when: "'welcome' not in this.content"
+      loop: "{{ groups['webservers'] }}"
+

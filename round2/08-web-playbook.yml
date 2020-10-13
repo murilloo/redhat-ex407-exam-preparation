@@ -1,0 +1,7 @@
+- hosts: all
+
+- name: main playbook for webservers
+  import_playbook: 06-setup-webservers.yml
+
+- name: main playbook for webclients
+  import_playbook: 07-setup-webclients.yml

@@ -1,0 +1,17 @@
+- name: playbook to run web role
+
+  hosts: all
+
+  roles:
+    - web
+
+  post_tasks:
+
+    - name: test if webserver is returning correct message
+      uri:
+        url: "http://{{ item }}:{{ http_port}}"
+        return_content: yes
+      register: this
+      failed_when: "'welcome' not in this.content"
+      loop: "{{ groups['webservers'] }}"
+      when: inventory_hostname in groups['webclients'] 

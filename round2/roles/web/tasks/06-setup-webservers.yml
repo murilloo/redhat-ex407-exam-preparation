@@ -1,0 +1,69 @@
+    - name: install packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+
+    - name: remove welcome
+      file:
+        path: /etc/httpd/conf.d/welcome.conf
+        state: absent
+
+    - name: ensure webserver root directory exist
+      file:
+        path: "{{ http_root }}"
+        state: directory
+        owner: apache
+        group: apache
+
+    - name: generate welcome message
+      copy:
+        content: "welcome to the {{ ansible_hostname }}"
+        dest: "{{ http_root }}/index.html"
+        owner: apache
+        group: apache
+      notify: restart http
+
+    - name: allow apache to modify files in {{ http_root }}
+      sefcontext:
+        target: '{{ http_root }}(/.*)?'
+        setype: httpd_sys_rw_content_t
+        state: present
+
+    - name: apply new SELinux file context to filesystem
+      command: restorecon -irv {{ http_root }}
+
+    - name: generate template of http config
+      template:
+        src: ./templates/vhost.j2
+        dest: /etc/httpd/conf.d/vhost.conf
+      notify: restart http
+
+    - name: set selinux context for httpd config
+      sefcontext:
+        target: '/etc/httpd/conf.d/(/.*)?'
+        setype: httpd_config_t
+        state: present
+
+    - name: apply selinux contect for httpd config
+      command: restorecon -irv /etc/httpd/conf.d/
+
+    - name: allow Apache to listen on tcp port {{ http_port }}
+      seport:
+        ports: "{{ http_port }}"
+        proto: tcp
+        setype: http_port_t
+        state: present
+                  
+    - name: ensure http service is up
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: ensure firewall is open
+      firewalld:
+        port: "{{ http_port }}/tcp"
+        state: enabled
+        immediate: yes
+        permanent: yes

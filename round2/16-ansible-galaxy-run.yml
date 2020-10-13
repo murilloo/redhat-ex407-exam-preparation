@@ -1,0 +1,6 @@
+- name: playbook to run ansible galaxy roles
+
+  hosts: webclients
+
+  roles:
+    - nginx

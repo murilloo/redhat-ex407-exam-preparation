@@ -1,0 +1,10 @@
+users:
+  - username: benjamin
+    groupname: devops
+    server: webservers
+  - username: marina
+    groupname: mother
+    server: webservers
+  - username: murillo
+    groupname: father
+    server: webclients

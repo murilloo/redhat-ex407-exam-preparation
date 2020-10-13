@@ -1,0 +1,60 @@
+- name: playbook to manage disks with volume group and logical volume
+
+  hosts: webservers,webclients
+
+  tasks:
+
+    - name: create partitions on secondary disk > 5
+      parted:
+        device: /dev/vdb
+        number: 1
+        state: present
+        part_start: 1GiB
+        part_end: 5GiB
+      when: (ansible_facts['devices']['vdb']['size'] | human_to_bytes / 1000000000) > 5
+
+    - name: create partitions on secondary disk > 5
+      parted:
+        device: /dev/vdb
+        number: 1
+        state: present
+      when: (ansible_facts['devices']['vdb']['size'] | human_to_bytes / 1000000000) < 5
+
+    - name: create volume group
+      lvg:
+       vg: vgdata
+       pvs: /dev/vdb1
+      when: ansible_facts['devices']['vdb']['partitions']['vdb1'] is defined
+
+    - name: verify if vgdata exists
+      command: vgs vgdata
+      register: vgdata
+      ignore_errors: yes
+
+    - name: fail if volume group do not exist
+      fail:
+        msg: "Volume Group do not exist"
+      when: "'not found' in vgdata.stderr"
+
+    - name: create logical volume
+      lvol:
+       vg: vgdata
+       lv: vgvolume
+       size: +100%FREE
+
+    - name: create file system on top of logical volume
+      filesystem:
+       fstype: xfs
+       device: /dev/vgdata/vgvolume
+
+    - name: create mount point on /filesystem
+      file:
+        path: /filesystem
+        state: directory
+
+    - name: mount file system
+      mount:
+        path: /filesystem
+        src: /dev/vgdata/vgvolume
+        state: mounted
+        fstype: xfs

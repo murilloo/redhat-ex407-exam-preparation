@@ -1,0 +1,94 @@
+- name: playbook to setup local repo
+
+  hosts: localhost
+
+  tasks:
+
+    - name: install packages
+      yum:
+        name:
+          - createrepo
+          - httpd
+          - vsftpd
+          - policycoreutils-python
+          - policycoreutils
+
+    - name: create folder for repo
+      file:
+        path: /var/repo/iso
+        state: directory
+        recurse: yes
+
+    - name: mount the iso
+      mount:
+        path: /var/repo/iso
+        src: ./files/rhel-server-7.5-x86_64-dvd.iso
+        fstype: iso9660
+        state: mounted
+
+    - name: generate http config
+      template:
+        src: ./templates/httpd.j2
+        dest: /etc/httpd/conf/httpd.conf
+      notify: restart http
+
+    - name: generate vsftp config
+      template:
+        src: ./templates/vsftpd.j2
+        dest: /etc/vsftpd/vsftpd.conf
+      notify: restart ftp
+
+    - name: createrepo
+      command: createrepo /var/repo
+      register: createrepo
+
+    - name: allow ftpd full access
+      seboolean:
+        name: ftpd_full_access
+        state: yes
+        persistent: yes
+
+    - name: allow apache to modify files in /var/repo
+      sefcontext:
+        target: '/var/repo(/.*)?'
+        setype: public_content_rw_t
+        state: present
+
+    - name: apply new SELinux file context to filesystem
+      command: restorecon -irv /var/repo
+
+    - name: ensure services are up
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - httpd
+        - vsftpd
+
+    - name: ensure firewall is open for http
+      firewalld:
+        service: http
+        state: enabled
+        immediate: yes
+        permanent: yes
+    
+    - name: ensure firewall is open for ftp
+      firewalld:
+        service: ftp
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+  handlers:
+  
+    - name: restart http
+      service:
+        name: httpd
+        state: restarted
+
+    - name: restart ftp
+      service:
+        name: vsftpd
+        state: restarted
+

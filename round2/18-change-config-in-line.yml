@@ -1,0 +1,19 @@
+- name: playbook to disable option in config file
+
+  hosts: all
+
+  tasks:
+
+    - name: change config line
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitTunnel no"
+        line: "#PermitTunnel no"
+      notify: restart sshd
+
+  handlers:
+    
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted

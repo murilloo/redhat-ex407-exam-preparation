@@ -1,0 +1,11 @@
+---
+# tasks file for web
+
+- include: 05-setup-filesystem.yml
+  when: "'webservers' in group_names"
+
+- include: 06-setup-webservers.yml
+  when: "'webservers' in group_names"
+
+- include: 07-setup-webclients.yml
+  when: "'webclients' in group_names"

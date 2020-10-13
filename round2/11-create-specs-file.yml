@@ -1,0 +1,11 @@
+- name: playbook to create specs file on managed hosts
+
+  hosts: all
+
+  tasks:
+
+    - name: generate specs file
+      template:
+        src: ./templates/specs.j2
+        dest: /home/ansible/specs.txt
+

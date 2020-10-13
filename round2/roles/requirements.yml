@@ -1,0 +1,7 @@
+- src: https://github.com/geerlingguy/ansible-role-redis
+  name: redis
+  version: master
+  scm: git
+
+- src: geerlingguy.nginx
+  name: nginx

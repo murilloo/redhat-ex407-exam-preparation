@@ -1,0 +1,32 @@
+- name: playbook to create users in the servers
+
+  hosts: all
+
+  vars_files: 
+    - vars/users.yml
+
+  tasks:
+
+    - name: create groups
+      group:
+        name: devops
+      when: inventory_hostname in groups['webservers']
+
+    - name: create groups
+      group:
+        name: mother
+      when: inventory_hostname in groups['webservers']
+
+    - name: create groups
+      group:
+        name: father
+      when: inventory_hostname in groups['webclients']
+
+    - name: create users
+      user:
+        name: "{{ item.username }}"
+        group: "{{ item.groupname }}"
+        state: present
+      loop: "{{ users }}"
+      when: "item.server in group_names"
+

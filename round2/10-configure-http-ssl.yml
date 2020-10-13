@@ -1,0 +1,61 @@
+- name: playbook to configure secure port on webservers
+
+  hosts: webservers
+
+  tasks:
+
+    - name: install packages
+      yum:
+        name: mod_ssl
+        state: present
+
+    - name: download ssl config
+      get_url:
+        url: http://control.example.com/node1_ssl.tar
+        dest: /tmp
+
+    - name: extract files
+      unarchive:
+        src: /tmp/node1_ssl.tar
+        dest: /etc/ssl/certs
+        remote_src: yes
+
+    - name: move https.conf
+      command: mv /etc/ssl/certs/https.conf /etc/httpd/conf.d/
+      register: https_move
+      notify: restart http
+
+    - name: remove temp files
+      file:
+        path: /tmp/node1_ssl.tar
+        state: absent
+
+    - name: allow Apache to listen on secure port
+      seport:
+        ports: "443"
+        proto: tcp
+        setype: http_port_t
+        state: present
+
+    - name: open the firewall
+      firewalld:
+        port: "443/tcp"
+        state: enabled
+        immediate: yes
+        permanent: yes
+
+  handlers:
+
+    - name: restart http
+      service:
+        name: httpd
+        state: restarted
+
+  post_tasks:
+
+    - name: test if webserver is returning correct message
+      uri:
+        url: "https://{{ item }}"
+        status_code: 200
+        validate_certs: no
+      loop: "{{ groups['webservers'] }}"

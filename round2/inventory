@@ -1,0 +1,9 @@
+control.example.com
+node1.example.com
+node2.example.com
+
+[webservers]
+node1.example.com
+
+[webclients]
+node2.example.com

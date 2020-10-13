@@ -1,0 +1,21 @@
+- name: playbook to install packages
+
+  hosts: all
+
+  tasks:
+
+    - name: install packages
+      yum:
+        name:
+          - httpd
+          - mod_ssl
+          - mariadb
+        state: present
+      when: inventory_hostname in groups['webservers']
+
+    - name: install dev packages
+      yum:
+        name: "@Development tools"
+        state: present
+      when: inventory_hostname in groups['webclients']
+

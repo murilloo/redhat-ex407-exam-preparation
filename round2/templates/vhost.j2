@@ -1,0 +1,13 @@
+Listen {{ http_port }}
+
+<VirtualHost *:{{ http_port }}>
+
+  ServerName {{ ansible_hostname }}
+  DocumentRoot {{ http_root }}
+
+  <Directory "{{ http_root }}">
+   AllowOverride None
+   Require all granted
+  </Directory>
+
+</VirtualHost>
